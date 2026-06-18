@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>项目地图 — lift-app (电梯智能终端)</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg: #ffffff; --surface: #f8f9fa; --border: #e0e0e0;
+      --text: #1a1a1a; --muted: #666; --accent: #4f46e5;
+      --warn-bg: #fff8e1; --warn-border: #f59e0b; --warn-text: #92400e;
+      --risk-bg: #fef2f2; --risk-border: #ef4444;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f0f0f; --surface: #1a1a1a; --border: #2a2a2a;
+        --text: #e5e5e5; --muted: #999; --accent: #818cf8;
+        --warn-bg: #1f1a00; --warn-border: #b45309; --warn-text: #fcd34d;
+        --risk-bg: #1f0000; --risk-border: #b91c1c;
+      }
+    }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+           background: var(--bg); color: var(--text); margin: 0; padding: 24px; max-width: 1100px; }
+    h1 { font-size: 22px; font-weight: 600; margin-bottom: 4px; }
+    .meta { color: var(--muted); font-size: 13px; margin-bottom: 32px; }
+    section { margin-bottom: 40px; }
+    h2 { font-size: 16px; font-weight: 600; border-bottom: 1px solid var(--border);
+         padding-bottom: 8px; margin-bottom: 16px; }
+    h3 { font-size: 14px; margin: 16px 0 8px; color: var(--muted); }
+    p, li { font-size: 14px; line-height: 1.6; }
+    .summary-box { background: var(--surface); border: 1px solid var(--border);
+                   border-radius: 10px; padding: 16px 20px; margin-bottom: 24px; }
+    .arch-box { background: var(--surface); border: 1px solid var(--border);
+                border-radius: 12px; padding: 24px; overflow-x: auto; }
+    .mindmap { display: flex; flex-wrap: wrap; gap: 12px; }
+    .branch { border: 1px solid var(--border); border-radius: 10px;
+              min-width: 200px; flex: 1 1 220px; overflow: hidden; background: var(--surface); }
+    .branch-header { padding: 10px 14px; font-size: 13px; font-weight: 600;
+                     cursor: pointer; display: flex; justify-content: space-between;
+                     align-items: center; user-select: none; }
+    .branch-header:hover { background: var(--border); }
+    .branch-body { padding: 6px 0; display: none; }
+    .branch.open .branch-body { display: block; }
+    .leaf { padding: 5px 14px 5px 26px; font-size: 12px; color: var(--text); }
+    .leaf .path { font-size: 10px; font-family: ui-monospace, monospace; color: var(--muted); margin-top: 2px; }
+    .risk-box { background: var(--risk-bg); border: 1px solid var(--risk-border);
+                border-radius: 10px; padding: 16px; }
+    .risk-item { font-size: 13px; padding: 4px 0; display: flex; gap: 8px; }
+    .risk-item::before { content: "⚠️"; flex-shrink: 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { text-align: left; padding: 8px 12px; background: var(--surface);
+         border-bottom: 1px solid var(--border); font-weight: 600; color: var(--muted); }
+    td { padding: 8px 12px; border-bottom: 1px solid var(--border); }
+    code { background: var(--surface); border: 1px solid var(--border);
+           border-radius: 4px; padding: 1px 5px; font-size: 11px; }
+    .flow { font-family: ui-monospace, monospace; font-size: 12px; background: var(--surface);
+            border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; white-space: pre-wrap; }
+    .tag { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 999px;
+           background: var(--surface); border: 1px solid var(--border); color: var(--muted); margin-right: 6px; }
+  </style>
+</head>
+<body>
+  <h1>项目心智地图：lift-app（电梯智能终端）</h1>
+  <p class="meta">
+    <span class="tag">Java 11</span>
+    <span class="tag">Android 14+</span>
+    <span class="tag">RK3568 竖屏</span>
+    <span class="tag">167 个 Java 源文件</span>
+    · 生成于 2026-06-18
+  </p>
+
+  <div class="summary-box">
+    <strong>一句话总结：</strong>
+    这是一个运行在 RK3568 电梯触摸屏上的 <strong>Android 梯媒终端 App</strong>，
+    核心机制是：通过 RS232 与按键板通信控制楼层/门，同时从云端拉取配置与广告排期，在竖屏 UI 上展示楼层按钮、广告、通知、欢迎语，并周期性上报心跳与播放日志。
+  </div>
+
+  <section>
+    <h2>🏗️ 技术架构图</h2>
+    <div class="arch-box">
+      <div class="mermaid">
+graph TD
+    subgraph entry["入口层"]
+        A["ElevatorApplication\n全局单例 / 模块装配"]
+        B["MainActivity\n竖屏主界面"]
+        C["ElevatorForegroundService\n保活 + RS232 延迟启动"]
+    end
+
+    subgraph ui["UI 层"]
+        D["FloorGridView\n楼层按钮网格"]
+        E["AdPlaybackController\n广告图片/视频"]
+        F["StatusRotator\n天气/欢迎/到站轮换"]
+        G["NoticeEngine\n广告区通知 overlay"]
+        H["SkinEngine / MourningGrayscale\n皮肤 & 国丧置灰"]
+    end
+
+    subgraph core["核心业务层"]
+        I["ElevatorController\nRS232 命令/心跳/帧解析"]
+        J["ElevatorState\nLiveData 状态模型"]
+        K["ScheduleEngine\n广告排期编排"]
+        L["PlayLogger\n播放日志队列"]
+        M["ArrivalAnnouncer\n到站语音播报"]
+    end
+
+    subgraph hw["硬件层"]
+        N["SerialManager\n串口读写"]
+        O["YsBoardApi\n亿晟 ysapi.jar AIDL"]
+        P["NativeSerialPort\n/dev/ttySx"]
+        Q["按键板 BT1-16\nRS232 协议"]
+    end
+
+    subgraph cloud["云端集成"]
+        R["RuntimeScheduler\nWorkManager 任务链"]
+        S["HeartbeatWorker\n心跳 + pullConfig"]
+        T["LiftCloudClient\nOkHttp REST"]
+        U["AssetSyncWorker\n资源下载"]
+        V["梯媒后台 API\nLift HTTP"]
+    end
+
+    subgraph storage["本地存储"]
+        W[("TerminalPrefs\n设备凭据/配置修订")]
+        X[("本地文件缓存\n皮肤/广告/语音资产")]
+    end
+
+    A --> B
+    A --> C
+    B --> D & E & F
+    A --> G & H & K & L & M
+    C --> O
+    B --> I
+    I --> J
+    I --> N
+    N --> P --> Q
+    O --> P
+    A --> R
+    R --> S & U
+    S --> T --> V
+    K --> E
+    L --> S
+    S --> W
+    U --> X
+    G --> E
+    H --> B
+
+    style A fill:#e0e7ff,stroke:#4f46e5
+    style B fill:#e0e7ff,stroke:#4f46e5
+    style C fill:#e0e7ff,stroke:#4f46e5
+    style I fill:#dcfce7,stroke:#16a34a
+    style K fill:#dcfce7,stroke:#16a34a
+    style T fill:#fef9c3,stroke:#ca8a04
+    style V fill:#fef9c3,stroke:#ca8a04
+    style W fill:#ffedd5,stroke:#ea580c
+    style X fill:#ffedd5,stroke:#ea580c
+    style Q fill:#fce7f3,stroke:#db2777
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>🧠 业务功能脑图</h2>
+    <div class="mindmap" id="mindmap"></div>
+  </section>
+
+  <section>
+    <h2>🚀 快速上手路径</h2>
+    <table>
+      <tr><th>想改什么</th><th>去哪里</th></tr>
+      <tr><td>楼层按钮样式/布局</td><td><code>ui/floor/FloorGridView.java</code> + <code>model/FloorButtonStyle.java</code></td></tr>
+      <tr><td>楼层触控 → RS232 发帧</td><td><code>MainActivity.onFloorTouch</code> → <code>ElevatorController.registerFloorTap</code></td></tr>
+      <tr><td>广告播放逻辑</td><td><code>ui/ad/AdPlaybackController.java</code> ← <code>schedule/ScheduleEngine</code></td></tr>
+      <tr><td>云端配置下发</td><td><code>cloud/HeartbeatWorker</code> → <code>ConfigPullCoordinator</code> → 各 <code>ConfigPull*Bridge</code></td></tr>
+      <tr><td>心跳/凭据/鉴权</td><td><code>cloud/LiftCloudClient.java</code> + <code>storage/TerminalPrefs.java</code></td></tr>
+      <tr><td>板卡串口/设备 SN</td><td><code>board/YsBoardApi.java</code> + <code>serial/UartPathResolver.java</code></td></tr>
+      <tr><td>皮肤时段切换</td><td><code>skin/SkinEngine.java</code> + <code>skin/SkinMidnightReceiver</code></td></tr>
+      <tr><td>通知 overlay</td><td><code>notice/NoticeEngine.java</code></td></tr>
+      <tr><td>欢迎语轮换</td><td><code>welcome/WelcomeEngine.java</code> + <code>ui/status/StatusRotator.java</code></td></tr>
+      <tr><td>播放日志上报</td><td><code>playlog/PlayLogger.java</code> → <code>PlayLogBatchWorker</code></td></tr>
+      <tr><td>环境/构建变体</td><td><code>config/env.{dev,uat,prod}.properties</code> + <code>app/build.gradle</code></td></tr>
+    </table>
+  </section>
+
+  <section>
+    <h2>📁 关键文件导航</h2>
+    <table>
+      <tr><th>文件</th><th>职责</th><th>重要程度</th></tr>
+      <tr><td><code>ElevatorApplication.java</code></td><td>App 入口，装配所有引擎/单例，板卡初始化，云端 bootstrap</td><td>⭐⭐⭐</td></tr>
+      <tr><td><code>ui/MainActivity.java</code></td><td>主界面：楼层网格、广告区、状态栏、门控按钮</td><td>⭐⭐⭐</td></tr>
+      <tr><td><code>core/ElevatorController.java</code></td><td>RS232 协议：心跳、楼层注册、门控、帧解析</td><td>⭐⭐⭐</td></tr>
+      <tr><td><code>cloud/LiftCloudClient.java</code></td><td>Lift HTTP：exchangeSecret / heartbeat / pullConfig</td><td>⭐⭐⭐</td></tr>
+      <tr><td><code>cloud/RuntimeScheduler.java</code></td><td>WorkManager 任务链调度（心跳/播放日志/天气/新闻/资产同步）</td><td>⭐⭐⭐</td></tr>
+      <tr><td><code>schedule/ScheduleEngine.java</code></td><td>广告排期编排，驱动 AdPlaybackController</td><td>⭐⭐⭐</td></tr>
+      <tr><td><code>board/YsBoardApi.java</code></td><td>亿晟板卡 SDK 封装（AIDL、SN、串口路径）</td><td>⭐⭐</td></tr>
+      <tr><td><code>storage/TerminalPrefs.java</code></td><td>终端凭据、配置修订版本、运行时参数</td><td>⭐⭐</td></tr>
+      <tr><td><code>service/ElevatorForegroundService.java</code></td><td>前台服务保活，延迟启动 RS232</td><td>⭐⭐</td></tr>
+      <tr><td><code>plan/README.md</code></td><td>权威设计文档索引（16+ 篇专题）</td><td>⭐⭐⭐</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <h2>🔀 数据流主路径</h2>
+    <h3>触控选层</h3>
+    <div class="flow">用户点击楼层按钮
+  → MainActivity.onFloorTouch
+  → ElevatorController.registerFloorTap (按下+松开帧对)
+  → SerialManager 写 RS232
+  → 按键板响应 0x06 到站帧
+  → ElevatorController.onFrame 更新 ElevatorState
+  → UI LiveData 刷新方向/楼层/注册灯</div>
+
+    <h3>云端配置同步</h3>
+    <div class="flow">板卡 SN 就绪 → TerminalPrefs 写入 terminalCode
+  → RuntimeScheduler.bootstrap
+  → HeartbeatWorker (WorkManager 链式 OneTimeWork)
+  → LiftCloudClient.heartbeat (比对 revision)
+  → pullConfig 拉取多域配置 (floor/skin/schedule/notice/...)
+  → ConfigPullCoordinator → 各 Bridge 通知 UI/Engine 热更新
+  → AssetSyncWorker 下载皮肤/广告/语音文件</div>
+
+    <h3>广告播放</h3>
+    <div class="flow">ScheduleEngine 按 bizDate + 小时槽计算 PlayItem
+  → AdPlaybackController 播放图片/视频 (Media3 ExoPlayer)
+  → PlayLogger 记录播放事件入队
+  → PlayLogBatchWorker 批量上报云端</div>
+  </section>
+
+  <section>
+    <h2>⚠️ 风险区域</h2>
+    <div class="risk-box" id="risks"></div>
+  </section>
+
+  <section>
+    <h2>🤖 AI / Vibe Coding 特征</h2>
+    <ul>
+      <li><code>ElevatorApplication</code> 超过 600 行，承担过多装配职责（God Object 倾向）</li>
+      <li>大量 <code>ConfigPull*Bridge</code> 类模式重复（Listener 桥接，可接受但维护成本高）</li>
+      <li>约 25+ 处宽泛 <code>catch (Exception)</code>，部分会吞掉根因（如 YsBoardApi 7 处）</li>
+      <li>根 <code>README.md</code> 仍写「脚手架待实现」，与代码实际完成度不一致（文档滞后）</li>
+      <li><code>config/env.dev.properties</code> 提交了 bootKey 明文（应仅放 local.properties）</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>🔧 环境依赖</h2>
+    <ul>
+      <li><strong>构建</strong>：<code>./gradlew :app:assembleDevDebug</code>（flavor: dev / uat / prod）</li>
+      <li><strong>配置</strong>：<code>config/env.&lt;env&gt;.properties</code> + <code>local.properties</code> 覆盖</li>
+      <li><strong>必填</strong>：<code>cloudBaseUrl</code>；开发环境还需 <code>bootKey</code>（换 deviceSecret）</li>
+      <li><strong>硬件</strong>：RK3568 + 亿晟 <code>ysapi.jar</code>；RS232 默认 <code>TTYS4</code></li>
+      <li><strong>外部服务</strong>：梯媒 Lift HTTP API、天气 API、新闻 API</li>
+      <li><strong>主要依赖</strong>：OkHttp、Gson、WorkManager、Media3 ExoPlayer、AndroidX Lifecycle</li>
+    </ul>
+  </section>
+
+  <script>
+    mermaid.initialize({ startOnLoad: true, theme: 'base', themeVariables: { fontSize: '13px' } });
+
+    const branches = [
+      { label: "电梯控制", children: [
+        { name: "楼层触控与注册", path: "ui/MainActivity → core/ElevatorController" },
+        { name: "RS232 协议帧", path: "protocol/FrameBuilder, Frame" },
+        { name: "串口管理", path: "serial/SerialManager, NativeSerialPort" },
+        { name: "状态模型 LiveData", path: "model/ElevatorState" },
+        { name: "到站语音播报", path: "voice/ArrivalAnnouncer" },
+        { name: "门开/门关", path: "ElevatorController.sendDoor" }
+      ]},
+      { label: "主界面 UI", children: [
+        { name: "楼层按钮网格", path: "ui/floor/FloorGridView" },
+        { name: "方向指示器", path: "ui/status/DirectionIndicator" },
+        { name: "状态栏轮换", path: "ui/status/StatusRotator" },
+        { name: "承重条", path: "activity_elevator.xml tv_capacity" },
+        { name: "广告播放区", path: "ui/ad/AdPlaybackController" }
+      ]},
+      { label: "云端对接", children: [
+        { name: "设备凭据 bootstrap", path: "cloud/LiftCloudClient.exchangeSecret" },
+        { name: "心跳 + 配置拉取", path: "cloud/HeartbeatWorker" },
+        { name: "任务链调度", path: "cloud/RuntimeScheduler" },
+        { name: "资源下载同步", path: "cloud/AssetSyncWorker" },
+        { name: "天气/新闻", path: "cloud/WeatherClient, NewsClient" },
+        { name: "OTA 升级", path: "cloud/UpgradeManager" },
+        { name: "异常上报", path: "cloud/AlertReporter" }
+      ]},
+      { label: "内容运营", children: [
+        { name: "广告排期", path: "schedule/ScheduleEngine" },
+        { name: "播放日志", path: "playlog/PlayLogger" },
+        { name: "通知 overlay", path: "notice/NoticeEngine" },
+        { name: "欢迎语", path: "welcome/WelcomeEngine" },
+        { name: "皮肤时段", path: "skin/SkinEngine" },
+        { name: "国丧置灰", path: "mourning/MourningGrayscaleApplier" }
+      ]},
+      { label: "板卡 & 系统", children: [
+        { name: "YS SDK 封装", path: "board/YsBoardApi" },
+        { name: "前台服务保活", path: "service/ElevatorForegroundService" },
+        { name: "凌晨自动重启", path: "reboot/AutoRebootScheduler" },
+        { name: "音量控制", path: "ui/volume/VolumeController" },
+        { name: "调试页面", path: "ui/debug/HardwareTestActivity" }
+      ]},
+      { label: "配置域 (pullConfig)", children: [
+        { name: "floor 楼层", path: "config/FloorConfigRepository" },
+        { name: "skin 皮肤", path: "skin/SkinRepository" },
+        { name: "schedule 排期", path: "schedule/ScheduleRepository" },
+        { name: "notice 通知", path: "notice/NoticeRepository" },
+        { name: "welcome 欢迎语", path: "welcome/WelcomeRepository" },
+        { name: "runtime 运行参数", path: "ConfigPullRuntimeBridge" },
+        { name: "load 承重", path: "ConfigPullLoadBridge" },
+        { name: "volume 音量", path: "ConfigPullVolumeBridge" }
+      ]}
+    ];
+
+    const risks = [
+      "config/env.dev.properties — bootKey 明文提交到仓库，应迁移到 local.properties",
+      "ElevatorApplication.java — 600+ 行 God Object，改动影响面大",
+      "README.md 写「脚手架待实现」但业务模块已基本齐全，新人会被误导",
+      "YsBoardApi.java — 7 处 catch(Exception)，板卡初始化失败可能静默",
+      "云端任务依赖板卡 SN + deviceSecret 双就绪，无凭据时整链 defer（需理解启动顺序）",
+      "RS232 与板卡 AIDL 绑定有严格时序（不可在 Application.onCreate 同步 bind）"
+    ];
+
+    const mm = document.getElementById('mindmap');
+    branches.forEach(b => {
+      const div = document.createElement('div');
+      div.className = 'branch open';
+      div.innerHTML = `
+        <div class="branch-header" onclick="this.parentElement.classList.toggle('open')">
+          <span>${b.label}</span><span>▾</span>
+        </div>
+        <div class="branch-body">
+          ${b.children.map(c => `<div class="leaf">${c.name}<div class="path">${c.path}</div></div>`).join('')}
+        </div>`;
+      mm.appendChild(div);
+    });
+
+    const rb = document.getElementById('risks');
+    risks.forEach(r => {
+      const d = document.createElement('div');
+      d.className = 'risk-item';
+      d.textContent = r;
+      rb.appendChild(d);
+    });
+  </script>
+</body>
+</html>
