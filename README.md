@@ -86,6 +86,13 @@
 
 会自动识别并标注 vibe coding 的典型问题：过度防御性 try/except、硬编码魔法数字、重复逻辑分散多处、函数超长、变量命名模糊（`result` / `data` / `temp`）、无意义注释块。
 
+
+![架构图](./image/ScreenShot_2026-06-18_181013_301.png)
+![业务脑图](./image/ScreenShot_2026-06-18_181024_410.png)
+![快速上手](./image/ScreenShot_2026-06-18_181040_805.png)
+![环境依赖](./image/ScreenShot_2026-06-18_181129_239.png)
+
+
 ---
 
 ## English
@@ -183,3 +190,5 @@ vibe-code-reader/
 ## License
 
 MIT
+
+
