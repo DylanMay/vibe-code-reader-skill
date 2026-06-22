@@ -1,5 +1,7 @@
 # vibe-code-reader
 
+[![skills.sh](https://skills.sh/b/DylanMay/vibe-code-reader-skill)](https://skills.sh/DylanMay/vibe-code-reader-skill)
+
 **中文** | [English](#english)
 
 ---
@@ -42,9 +44,27 @@
 
 ### 安装与使用
 
+**方式一：命令行安装（推荐，支持 Cursor / Claude Code / Codex 等）**
+
+```bash
+# 安装到当前项目
+npx skills add DylanMay/vibe-code-reader-skill -y
+
+# 安装到全局（所有项目可用）
+npx skills add DylanMay/vibe-code-reader-skill -g -y
+
+# 仅安装到 Cursor
+npx skills add DylanMay/vibe-code-reader-skill -a cursor -y
+```
+
+也可在 [skills.sh](https://skills.sh/DylanMay/vibe-code-reader-skill) 查看详情。
+
+**方式二：Claude.ai 网页版**
+
 1. 下载 `vibe-code-reader.skill` 文件
 2. 在 Claude.ai 的 Skill 管理页面上传安装
-3. 直接对话触发，无需特殊命令
+
+安装后直接对话触发，无需特殊命令。
 
 **触发示例：**
 
@@ -133,9 +153,27 @@ Scales automatically by project size:
 
 ### Installation & usage
 
+**Option 1: CLI install (recommended — Cursor, Claude Code, Codex, and more)**
+
+```bash
+# Install to current project
+npx skills add DylanMay/vibe-code-reader-skill -y
+
+# Install globally (available in all projects)
+npx skills add DylanMay/vibe-code-reader-skill -g -y
+
+# Install to Cursor only
+npx skills add DylanMay/vibe-code-reader-skill -a cursor -y
+```
+
+See also: [skills.sh/DylanMay/vibe-code-reader-skill](https://skills.sh/DylanMay/vibe-code-reader-skill)
+
+**Option 2: Claude.ai web**
+
 1. Download `vibe-code-reader.skill`
 2. Upload it in the Claude.ai Skill management page
-3. Trigger it naturally in conversation — no special commands needed
+
+Trigger it naturally in conversation — no special commands needed.
 
 **Example prompts:**
 
