@@ -2,7 +2,7 @@
 
 [![skills.sh](https://skills.sh/b/DylanMay/vibe-code-reader-skill)](https://skills.sh/DylanMay/vibe-code-reader-skill)
 
-[![skill123]]([https://skills.sh/DylanMay/vibe-code-reader-skill](https://skill123.app/skills/vibe-code-reader-skill/))
+[skill123](https://skill123.app/skills/vibe-code-reader-skill/)
 
 
 **中文** | [English](#english)
